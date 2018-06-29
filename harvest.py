@@ -86,32 +86,34 @@ def make_melon_type_lookup(melon_types):
 class Melon:
     """A melon in a melon harvest."""
 
-    def __init__(self, melon_code, shape_rating, color_rating, field_harvested,
+    def __init__(self, melon_type, shape_rating, color_rating, field_harvested,
                  harvester):
 
-        self.melon_code = melon_code
+        self.melon_type = melon_type
         self.shape_rating = shape_rating
         self.color_rating = color_rating
         self.field_harvested = field_harvested
         self.harvester = harvester
 
     def is_sellable(self):
-        return self.shape_rating > 5 and self.color_rating > 5 and self.field_harvested != "Field 3"
+        return self.shape_rating > 5 and self.color_rating > 5 and self.field_harvested != 3
 
 
 def make_melons(melon_types):
     """Returns a list of Melon objects."""
     melon_list = []
+    melon_types = make_melon_type_lookup()
 
-    melon_1 = Melon("yw", 8, 7, "Field 2", "Sheila")
-    melon_2 = Melon("yw", 3, 4, "Field 2", "Sheila")
-    melon_3 = Melon("yw", 9, 8, "Field 3", "Sheila")
-    melon_4 = Melon("cas", 10, 6, "Field 35", "Sheila")
-    melon_5 = Melon("cren", 8, 9, "Field 35", "Michael")
-    melon_6 = Melon("cren", 8, 2, "Field 35", "Michael")
-    melon_7 = Melon("cren", 2, 3, "Field 4", "Michael")
-    melon_8 = Melon("musk", 6, 7, "Field 4", 'Michael')
-    melon_9 = Melon("yw", 7, 10, "Field 3", "Sheila")
+
+    melon_1 = Melon(melon_types["yw"], 8, 7, 2, "Sheila")
+    melon_2 = Melon(melon_types["yw"], 3, 4, 2, "Sheila")
+    melon_3 = Melon(melon_types["yw"], 9, 8, 3, "Sheila")
+    melon_4 = Melon(melon_types["cas"], 10, 6, 35, "Sheila")
+    melon_5 = Melon(melon_types["cren"], 8, 9, 35, "Michael")
+    melon_6 = Melon(melon_types["cren"], 8, 2, 35, "Michael")
+    melon_7 = Melon(melon_types["cren"], 2, 3, 4, "Michael")
+    melon_8 = Melon(melon_types["musk"], 6, 7, 4, 'Michael')
+    melon_9 = Melon(melon_types["yw"], 7, 10, 3, "Sheila")
 
     melon_list.extend([melon_1, melon_2, melon_3, melon_4, melon_5, melon_6,
                        melon_7, melon_8, melon_9])
@@ -125,11 +127,31 @@ def get_sellability_report(melons):
             can_be_sold = "# CAN BE SOLD"
         else:
             can_be_sold = "# NOT SELLABLE"
-        print(f"Harvest by {melon.harvester} from {melon.field_harvested} {can_be_sold}")
+        print(f"Harvest by {melon.harvester} from Field {melon.field_harvested} {can_be_sold}")
+
+
+def get_melons_from_file(filename):
+    
+    melons = []
+    melon_type_lookup = make_melon_type_lookup(make_melon_types())
+
+    with open(filename) as file:
+        for line in file:
+            data = line.split()
+            shape = int(data[1])
+            color = int(data[3])
+            melon_type = melon_type_lookup[data[5]]
+            harvester = data[8]
+            field = int(data[11])
+            melon = Melon(melon_type, shape, color, field, harvester)
+            melons.append(melon)
+
+    return melons
 
 
 melon_types = make_melon_types()
 print_pairing_info(melon_types)
 lookup = make_melon_type_lookup(melon_types)
-get_sellability_report(make_melons(melon_types))
+# get_sellability_report(make_melons(melon_types))
 
+get_sellability_report(get_melons_from_file("harvest_log.txt"))
